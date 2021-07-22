@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -14,6 +17,23 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //making list of company from company class
+  List<Company> companies = [];
+  //function to get company data from meroshare api
+  getCompanyData() async {
+    final response =
+        await http.get(Uri.https('jsonplaceholder.typicode.com', 'users'));
+    var jsonData = jsonDecode(response.body);
+    print(jsonData);
+
+    for (var c in jsonData) {
+      Company company =
+          Company(c["name"], c["username"], c["email"], c["name"]);
+      companies.add(company);
+      print(companies.length);
+    }
+  }
+
   var boid;
   List boidList = [];
   var selectedBO;
@@ -132,7 +152,11 @@ class _HomePageState extends State<HomePage> {
                   "Check Result",
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
-                onPressed: () {}),
+                onPressed: () {
+                  getCompanyData();
+                }),
+
+            //response of check result below
           ],
         ),
       ),
@@ -149,4 +173,10 @@ class _HomePageState extends State<HomePage> {
           await showInformationDialog(context);
         },
       );
+}
+
+class Company {
+  var id, name, scrip, isFileUploaded;
+//constructor
+  Company(this.id, this.name, this.scrip, this.isFileUploaded);
 }
