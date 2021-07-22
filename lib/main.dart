@@ -19,29 +19,26 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   //making list of company from company class
   List<Company> companies = [];
+  List companyList = [];
   //function to get company data from meroshare api
   getCompanyData() async {
     final response =
         await http.get(Uri.https('jsonplaceholder.typicode.com', 'users'));
     var jsonData = jsonDecode(response.body);
-    print(jsonData);
+    //print(jsonData);
 
     for (var c in jsonData) {
       Company company =
           Company(c["name"], c["username"], c["email"], c["name"]);
       companies.add(company);
-      print(companies.length);
+      companyList.add(c["name"]);
     }
   }
 
   var boid;
   List boidList = [];
   var selectedBO;
-  List companyList = [
-    'Mahila Laghubiita',
-    'Union Life Insurance',
-    'Jivan Laghubitta'
-  ];
+
   var selectedCompany;
 
   //for adding bo id ui
