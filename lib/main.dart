@@ -2,7 +2,46 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
+
+//making list of company from company class
+List<Company> companies = [];
+List companyList = [];
+
+var boid;
+var selectedBO;
+
+var selectedCompany;
+
+//function to get company data from meroshare api
+getCompanyData() async {
+  final response = await http.get(
+      Uri.https('iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
+
+  var jsonData;
+  if (response.statusCode == 200) {
+    jsonData = json.decode(response.body);
+  }
+  //var jsonData = jsonDecode(response.body);
+  //print(jsonData["body"]);
+  //print(jsonData["body"][1]["name"]);
+
+  for (var c in jsonData["body"]) {
+    //Company company =
+    //   Company(c["name"], c["username"], c["email"], c["name"]);
+    //companies.add(company);
+    if (!companyList.contains(c["scrip"])) {
+      companyList.add(c["scrip"]);
+      Company company =
+          Company(c["id"], c["name"], c["scrip"], c["isFileUploaded"]);
+      companies.add(company);
+    }
+
+    //print(c["name"]);
+  }
+  print(companyList);
+}
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -17,133 +56,65 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  //making list of company from company class
-  List<Company> companies = [];
-  List companyList = [];
-  //function to get company data from meroshare api
-  getCompanyData() async {
-    final response = await http.get(Uri.https(
-        'iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
-
-    var jsonData;
-    if (response.statusCode == 200) {
-      jsonData = json.decode(response.body);
-    }
-    //var jsonData = jsonDecode(response.body);
-    //print(jsonData);
-
-    for (var c in jsonData) {
-      Company company =
-          Company(c["name"], c["username"], c["email"], c["name"]);
-      companies.add(company);
-      companyList.add(c["name"]);
-    }
-  }
-
-  var boid;
-  List boidList = [];
-  var selectedBO;
-
-  var selectedCompany;
-
-  //for adding bo id ui
-  Future<void> showInformationDialog(BuildContext context) async {
-    return await showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            content: TextField(
-              keyboardType: TextInputType.number,
-              onChanged: (val) {
-                setState(() {
-                  boid = val;
-                });
-              },
-              decoration: InputDecoration(
-                  contentPadding: EdgeInsets.all(10),
-                  hintText: "Enter your valid BO ID",
-                  labelText: "BO ID",
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(32),
-                  )),
-            ),
-            actions: <Widget>[
-              MaterialButton(
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                color: Colors.indigo,
-                child: Text(
-                  'Save',
-                  style: TextStyle(color: Colors.white),
-                ),
-                onPressed: () {
-                  if (!boid.isEmpty) {
-                    boidList.add(boid);
-                    Navigator.of(context).pop();
-                    print(boidList);
-                    boid = "";
-                  }
-                },
-              ),
-            ],
-          );
-        });
-  }
-
   @override
   Widget build(BuildContext context) {
+    setState(() {
+      getCompanyData();
+    });
+    // getCompanyData();
+
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.indigo));
     return Scaffold(
-      floatingActionButton: floatAdd(),
       body: Center(
         child: Column(
           children: [
             SizedBox(
-              height: 200,
+              height: 300,
             ),
 
             //choose company dropdown
-            DropdownButton(
-                hint: Text(
-                  "Choose Company",
-                  style: TextStyle(fontSize: 25, color: Colors.indigo),
-                ),
-                value: selectedCompany,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedCompany = newValue;
-                  });
-                },
-                items: companyList.map((company) {
-                  return DropdownMenuItem(
-                    child: new Text(company),
-                    value: company,
-                  );
-                }).toList()),
+            Padding(
+              padding: const EdgeInsets.only(left: 0, right: 0),
+              child: DropdownButton(
+                  hint: Text(
+                    "Choose Company",
+                    style: TextStyle(
+                      fontSize: 20,
+                    ),
+                  ),
+                  value: selectedCompany,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selectedCompany = newValue;
+                    });
+                  },
+                  items: companies.map((company) {
+                    return DropdownMenuItem(
+                      child: new Text(
+                        company.name,
+                        style: TextStyle(fontSize: 15),
+                      ),
+                      value: company,
+                    );
+                  }).toList()),
+            ),
             SizedBox(
               height: 30,
             ),
 
-            //choose bo id dropdown
-            DropdownButton(
-              hint: Text(
-                'Choose BoID',
-                style: TextStyle(fontSize: 25, color: Colors.indigo),
+            //boid ui
+            Padding(
+              padding: const EdgeInsets.only(left: 20, right: 20),
+              child: TextField(
+                keyboardType: TextInputType.number,
+                onChanged: (value) {
+                  boid = value;
+                },
+                decoration: InputDecoration(
+                  hintText: "Enter your 13 digits BOID",
+                ),
               ),
-              value: selectedBO,
-              onChanged: (newValue) {
-                setState(() {
-                  selectedBO = newValue;
-                });
-              },
-              items: boidList.map((boid) {
-                return DropdownMenuItem(
-                  child: new Text(boid.toString()),
-                  value: boid,
-                );
-              }).toList(),
             ),
             SizedBox(
               height: 30,
@@ -155,7 +126,8 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 onPressed: () {
-                  getCompanyData();
+                  print("boid: " + boid);
+                  print("boid: $boid and company: ${selectedCompany.id}");
                 }),
 
             //response of check result below
@@ -164,17 +136,6 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
-  //add bo id button widget
-  Widget floatAdd() => FloatingActionButton.extended(
-        label: Text(
-          "New BOID",
-        ),
-        icon: Icon(Icons.add),
-        onPressed: () async {
-          await showInformationDialog(context);
-        },
-      );
 }
 
 class Company {
