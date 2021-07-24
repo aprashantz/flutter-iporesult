@@ -1,47 +1,11 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:http/http.dart' as http;
 
-//making list of company from company class
-List<Company> companies = [];
-List companyList = [];
+import 'fetchCompany.dart';
 
 var boid;
-var selectedBO;
-
 var selectedCompany;
-
-//function to get company data from meroshare api
-getCompanyData() async {
-  final response = await http.get(
-      Uri.https('iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
-
-  var jsonData;
-  if (response.statusCode == 200) {
-    jsonData = json.decode(response.body);
-  }
-  //var jsonData = jsonDecode(response.body);
-  //print(jsonData["body"]);
-  //print(jsonData["body"][1]["name"]);
-
-  for (var c in jsonData["body"]) {
-    //Company company =
-    //   Company(c["name"], c["username"], c["email"], c["name"]);
-    //companies.add(company);
-    if (!companyList.contains(c["scrip"])) {
-      companyList.add(c["scrip"]);
-      Company company =
-          Company(c["id"], c["name"], c["scrip"], c["isFileUploaded"]);
-      companies.add(company);
-    }
-
-    //print(c["name"]);
-  }
-  print(companyList);
-}
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -57,11 +21,13 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   @override
+  void initState() {
+    getCompanyData();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    setState(() {
-      getCompanyData();
-    });
-    // getCompanyData();
+    //getCompanyData();
 
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.indigo));
@@ -70,7 +36,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             SizedBox(
-              height: 300,
+              height: 220,
             ),
 
             //choose company dropdown
@@ -92,7 +58,7 @@ class _HomePageState extends State<HomePage> {
                   items: companies.map((company) {
                     return DropdownMenuItem(
                       child: new Text(
-                        company.name,
+                        company.scrip,
                         style: TextStyle(fontSize: 15),
                       ),
                       value: company,
@@ -105,7 +71,7 @@ class _HomePageState extends State<HomePage> {
 
             //boid ui
             Padding(
-              padding: const EdgeInsets.only(left: 20, right: 20),
+              padding: const EdgeInsets.only(left: 40, right: 40),
               child: TextField(
                 keyboardType: TextInputType.number,
                 onChanged: (value) {
@@ -126,7 +92,6 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 onPressed: () {
-                  print("boid: " + boid);
                   print("boid: $boid and company: ${selectedCompany.id}");
                 }),
 
