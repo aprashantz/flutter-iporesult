@@ -22,9 +22,14 @@ class _HomePageState extends State<HomePage> {
   List companyList = [];
   //function to get company data from meroshare api
   getCompanyData() async {
-    final response =
-        await http.get(Uri.https('jsonplaceholder.typicode.com', 'users'));
-    var jsonData = jsonDecode(response.body);
+    final response = await http.get(Uri.https(
+        'iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
+
+    var jsonData;
+    if (response.statusCode == 200) {
+      jsonData = json.decode(response.body);
+    }
+    //var jsonData = jsonDecode(response.body);
     //print(jsonData);
 
     for (var c in jsonData) {
