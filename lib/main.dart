@@ -1,11 +1,13 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-
-import 'fetchCompany.dart';
+import 'package:http/http.dart' as http;
 
 var boid;
-var selectedCompany;
+var selectedCompanyId;
+
+List companyList = [];
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -20,17 +22,32 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Future getCompanyData() async {
+    final response = await http.get(Uri.https(
+        'iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
+
+    var jsonData;
+    if (response.statusCode == 200) {
+      jsonData = json.decode(response.body);
+    }
+
+    setState(() {
+      companyList = jsonData['body'];
+    });
+  }
+
+  //running method to get company details as program runs
   @override
   void initState() {
     getCompanyData();
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    //getCompanyData();
-
     SystemChrome.setSystemUIOverlayStyle(
         SystemUiOverlayStyle(statusBarColor: Colors.indigo));
+
     return Scaffold(
       body: Center(
         child: Column(
@@ -49,19 +66,19 @@ class _HomePageState extends State<HomePage> {
                       fontSize: 20,
                     ),
                   ),
-                  value: selectedCompany,
+                  value: selectedCompanyId,
                   onChanged: (newValue) {
                     setState(() {
-                      selectedCompany = newValue;
+                      selectedCompanyId = newValue;
                     });
                   },
-                  items: companies.map((company) {
+                  items: companyList.map((company) {
                     return DropdownMenuItem(
                       child: new Text(
-                        company.scrip,
+                        company['scrip'],
                         style: TextStyle(fontSize: 15),
                       ),
-                      value: company,
+                      value: company['id'].toString(),
                     );
                   }).toList()),
             ),
@@ -92,7 +109,10 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 onPressed: () {
-                  print("boid: $boid and company: ${selectedCompany.id}");
+                  var id = boid;
+                  var company = selectedCompanyId;
+
+                  print("boid: $id and company: $company");
                 }),
 
             //response of check result below
