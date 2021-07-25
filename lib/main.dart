@@ -42,14 +42,19 @@ class _HomePageState extends State<HomePage> {
     final String resultAPI =
         "https://iporesult.cdsc.com.np/result/result/check";
     final response = await http.post(Uri.parse(resultAPI),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
         body: jsonEncode(
             <String, String>{"companyShareId": "$shareId", "boid": "$bo"}));
 
     var jsonData;
     if (response.statusCode == 200) {
-      jsonData = response.body;
+      jsonData = json.decode(response.body);
+      result = jsonData["message"];
     }
     print(response.statusCode);
+    print(jsonData.runtimeType);
   }
 
   //running method to get company details as program runs
@@ -69,7 +74,7 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: [
             SizedBox(
-              height: 220,
+              height: 170,
             ),
 
             //choose company dropdown
@@ -125,14 +130,20 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 onPressed: () {
-                  String id = boid;
-                  String company = selectedCompanyId;
+                  setState(() {
+                    String id = boid;
+                    String company = selectedCompanyId;
 
-                  print("boid: $id and company: $company");
-                  checkResult(company, id);
+                    print("boid: $id and company: $company");
+                    checkResult(company, id);
+                  });
                 }),
 
+            SizedBox(height: 20),
+
             //response of check result below
+
+            result == null ? Container() : Text("$result"),
           ],
         ),
       ),
