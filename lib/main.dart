@@ -49,10 +49,13 @@ class _HomePageState extends State<HomePage> {
             <String, String>{"companyShareId": "$shareId", "boid": "$bo"}));
 
     var jsonData;
-    if (response.statusCode == 200) {
-      jsonData = json.decode(response.body);
-      result = jsonData["message"];
-    }
+    setState(() {
+      if (response.statusCode == 200) {
+        jsonData = json.decode(response.body);
+        result = jsonData["message"];
+      }
+    });
+
     print(response.statusCode);
     print(jsonData.runtimeType);
   }
@@ -129,7 +132,7 @@ class _HomePageState extends State<HomePage> {
                   "Check Result",
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
-                onPressed: () {
+                onPressed: () async {
                   setState(() {
                     String id = boid;
                     String company = selectedCompanyId;
