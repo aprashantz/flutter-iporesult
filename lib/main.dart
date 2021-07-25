@@ -6,8 +6,8 @@ import 'package:http/http.dart' as http;
 
 var boid;
 var selectedCompanyId;
-
 List companyList = [];
+var result;
 
 void main() => runApp(MaterialApp(
       debugShowCheckedModeBanner: false,
@@ -22,6 +22,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  //method to get companies list
   Future getCompanyData() async {
     final response = await http.get(Uri.https(
         'iporesult.cdsc.com.np', 'result/companyShares/fileUploaded'));
@@ -34,6 +35,21 @@ class _HomePageState extends State<HomePage> {
     setState(() {
       companyList = jsonData['body'];
     });
+  }
+
+  //method to send check result request and get result response
+  Future checkResult(shareId, bo) async {
+    final String resultAPI =
+        "https://iporesult.cdsc.com.np/result/result/check";
+    final response = await http.post(Uri.parse(resultAPI),
+        body: jsonEncode(
+            <String, String>{"companyShareId": "$shareId", "boid": "$bo"}));
+
+    var jsonData;
+    if (response.statusCode == 200) {
+      jsonData = response.body;
+    }
+    print(response.statusCode);
   }
 
   //running method to get company details as program runs
@@ -109,10 +125,11 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(color: Colors.white, fontSize: 20),
                 ),
                 onPressed: () {
-                  var id = boid;
-                  var company = selectedCompanyId;
+                  String id = boid;
+                  String company = selectedCompanyId;
 
                   print("boid: $id and company: $company");
+                  checkResult(company, id);
                 }),
 
             //response of check result below
