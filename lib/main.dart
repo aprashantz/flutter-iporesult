@@ -70,11 +70,14 @@ class _HomePageState extends State<HomePage> {
         SystemUiOverlayStyle(statusBarColor: Colors.indigo));
 
     return Scaffold(
+      appBar: AppBar(
+        title: Text("View IPO Result"),
+      ),
       body: Center(
         child: Column(
           children: [
             SizedBox(
-              height: 170,
+              height: 60,
             ),
 
             //choose company dropdown
